@@ -22,13 +22,13 @@ Actions → Free Windows release → Run workflow → версия, наприм
 | DEPLOY_SSH_KEY | Отдельный приватный SSH-ключ развёртывания |
 | DEPLOY_HOST_KEY | Проверенная полная строка known_hosts для VPS |
 
-Variables закрытого репозитория: VIBECAST_BOT_USERNAME, VIBECAST_API_URL (отдельный HTTPS-домен без пути), TERMS_URL (условия покупки), SUPPORT_URL (контакт поддержки по HTTPS), ADMIN_USER_IDS (Telegram ID через запятую).
+Variables закрытого репозитория: VIBECAST_BOT_USERNAME, VIBECAST_API_URL (отдельный HTTPS-домен без пути), SUPPORT_URL (контакт поддержки по HTTPS), ADMIN_USER_IDS (Telegram ID через запятую).
 
 Deploy использует environment production. Задавайте параметры на уровне репозитория либо environment; параметры сборки Pro должны быть доступны и release workflow. В Windows попадает только публичный ключ проверки лицензий.
 
 ## Порядок запуска
 
-1. Создать бота, опубликовать условия покупки и контакт поддержки.
+1. Условия отображаются в боте по команде /terms. Контакт поддержки: https://t.me/VibeCastsupport.
 2. В закрытом проекте выполнить `python tools/generate_license_key.py`. Сохранить .secrets/license.env в резервную копию, значение ключа перенести в Secret. Не менять его при обновлениях.
 3. Настроить SSH и параметры, запустить Deploy isolated VibeCast service.
 4. Подключить отдельный HTTPS-хост API по примеру закрытого проекта. Конфигурацию и службы Nover не заменять.
