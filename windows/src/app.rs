@@ -65,7 +65,6 @@ const ID_BLOSSOM: u32 = 217;
 const ID_RAIN_THUNDER: u32 = 560;
 const ID_RAIN_PERSON: u32 = 561;
 const ID_RAIN_WATER: u32 = 562;
-const ID_TORNADO: u32 = 563;
 const ID_MIXED: u32 = 219;
 const ID_GROUND: u32 = 220;
 const ID_OPACITY_FOLD: u32 = 221;
@@ -480,7 +479,6 @@ fn entries(settings: &Settings, login: bool, sliders: bool) -> Vec<Entry> {
     };
     entries.extend(accumulate(settings, !heaps.is_empty(), sliders));
     entries.push(Entry::Submenu { label: tr("mode").to_string(), entries: modes });
-    entries.push(Entry::toggle(ID_TORNADO, tr("tornado"), settings.tornado_active, !crate::test_version()));
     if falling.contains(&Mode::Rain) {
         entries.push(Entry::Submenu { label: tr("rain.options").to_string(), entries: vec![
             Entry::toggle(ID_RAIN_THUNDER, tr("rain.thunder"), settings.rain_thunder, true),
@@ -688,7 +686,6 @@ fn choose(window: HWND, chosen: u32, login: bool) {
                     settings.winter_window_walls = !settings.winter_window_walls;
                     Command::WinterWindowWalls(settings.winter_window_walls)
                 }
-                ID_TORNADO => { settings.tornado_active = !settings.tornado_active; Command::Tornado(settings.tornado_active) }
                 ID_RAIN_THUNDER => { settings.rain_thunder = !settings.rain_thunder; Command::RainThunder(settings.rain_thunder) }
                 ID_RAIN_PERSON => { settings.rain_person = !settings.rain_person; Command::RainPerson(settings.rain_person) }
                 ID_RAIN_WATER => { settings.rain_water = !settings.rain_water; Command::RainWater(settings.rain_water) }
