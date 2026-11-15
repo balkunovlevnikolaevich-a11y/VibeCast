@@ -1,0 +1,23 @@
+# Build output and local state
+**/target/
+release/
+dist/
+*.exe
+*.msi
+*.zip
+*.log
+*.sqlite*
+*.db
+__pycache__/
+.venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+secrets/
+.secrets/
+*.env
+.DS_Store

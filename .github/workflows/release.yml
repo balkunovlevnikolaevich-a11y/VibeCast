@@ -1,0 +1,54 @@
+name: Free Windows release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, for example 0.13.3'
+        required: true
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      VIBECAST_UPDATE_ASSET: VibeCast-Free-Setup.exe
+      VIBECAST_BOT_USERNAME: ${{ vars.VIBECAST_BOT_USERNAME }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Set version
+        shell: pwsh
+        env:
+          REQUESTED_VERSION: ${{ inputs.version || github.ref_name }}
+        run: |
+          $v=$env:REQUESTED_VERSION -replace '^v',''
+          if ($v -notmatch '^\d+\.\d+\.\d+$') { throw 'Use a stable three-part version' }
+          $p='windows/Cargo.toml'
+          $text=[IO.File]::ReadAllText($p)
+          $text=[regex]::Replace($text,'(?m)^version = "[^"]+"',('version = "'+$v+'"'))
+          [IO.File]::WriteAllText($p,$text)
+          "RELEASE_TAG=v$v" | Out-File -Append $env:GITHUB_ENV
+      - name: Check public boundary
+        run: python tools/check_public.py
+      - name: Build app and installer
+        shell: pwsh
+        run: |
+          ./build-vibecast.ps1 -OutputDirectory "$pwd/dist"
+          Move-Item dist/VibeCast.exe dist/VibeCast-Free.exe
+          Move-Item dist/VibeCast-Setup.exe dist/VibeCast-Free-Setup.exe
+          Get-FileHash dist/*.exe -Algorithm SHA256 | ForEach-Object { '{0}  {1}' -f $_.Hash,[IO.Path]::GetFileName($_.Path) } | Set-Content dist/SHA256SUMS-Free.txt
+      - name: Publish release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { gh release create $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "VibeCast $env:RELEASE_TAG" --generate-notes }
+          if ($LASTEXITCODE -ne 0) { throw 'Release creation failed' }
+          gh release upload $env:RELEASE_TAG dist/VibeCast-Free.exe dist/VibeCast-Free-Setup.exe dist/SHA256SUMS-Free.txt --repo $env:GITHUB_REPOSITORY --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Asset upload failed' }

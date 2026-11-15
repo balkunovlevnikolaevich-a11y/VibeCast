@@ -1,0 +1,15 @@
+name: Free source check
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/check_public.py
+      - run: cargo check --manifest-path windows/Cargo.toml --bin Snowhush
